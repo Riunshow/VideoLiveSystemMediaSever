@@ -2,6 +2,7 @@ const { NodeMediaServer } = require('node-media-server')
 const axios = require('axios');
 const serverAddr = 'localhost:7001'
 let streamArr = [];
+// 设置配置信息
 const config = {
   rtmp: {
     port: 1935,
@@ -27,19 +28,18 @@ const config = {
       mp4Flags: '[movflags=faststart]',
     }]
   }
-};
+}; 
 
 var nms = new NodeMediaServer(config)
 nms.run();
 
-
+// 推流开始
 nms.on('postPublish', (id, StreamPath, args) => {
   let token = StreamPath.split('/')[2]
 
   axios.post(`http://${serverAddr}/api/live/getRoomIdByToken`, {
     token
   }).then(res => {
-    console.log(res.data.data);
     let roomID = res.data.data.roomID
     streamArr[id] = roomID;
   
@@ -53,10 +53,8 @@ nms.on('postPublish', (id, StreamPath, args) => {
   }).catch((err) => {
     console.log(err);
   })
-
-
 });
-
+// 推流结束
 nms.on('donePublish', (id, StreamPath, args) => {
   let roomID = streamArr[id];
   
